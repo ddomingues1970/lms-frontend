@@ -1,0 +1,39 @@
+<section style="padding:16px">
+  <h2>Minhas matrículas</h2>
+
+  <div class="toolbar">
+    <label>
+      <strong>Student ID:</strong>
+      <input type="number" [(ngModel)]="studentId" min="1" />
+    </label>
+    <button (click)="load()" [disabled]="!studentId || loading">Buscar</button>
+  </div>
+
+  <div *ngIf="loading">Carregando...</div>
+  <div *ngIf="error" class="err">Erro: {{ error }}</div>
+
+  <table *ngIf="!loading && !error && items.length" border="1" cellpadding="8" cellspacing="0" style="min-width:720px">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Student</th>
+      <th>Course</th>
+      <th>Status</th>
+      <th>Data matrícula</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let e of items">
+      <td>{{ e.id }}</td>
+      <td>{{ e.studentId }}</td>
+      <td>{{ e.courseId }}</td>
+      <td>{{ e.status }}</td>
+      <td>{{ e.enrollmentDate }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !error && !items.length" class="muted">
+    Nenhuma matrícula encontrada.
+  </div>
+</section>

@@ -1,0 +1,11 @@
+.toolbar {
+  margin: 12px 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  input { width: 140px; margin-left: 8px; }
+}
+
+.err { color: #c00; }
+.muted { color: #666; }
