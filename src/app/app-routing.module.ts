@@ -2,6 +2,15 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
+
+  // Auth
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component')
+        .then(c => c.LoginComponent),
+  },
+
   // Students
   {
     path: 'students',
@@ -9,6 +18,13 @@ const routes: Routes = [
       import('./features/students/students-list/students-list.component')
         .then(c => c.StudentsListComponent),
   },
+
+   {
+    path: 'students/register',
+    loadComponent: () =>
+      import('./features/students/students-create/students-create.component')
+        .then(c => c.StudentsCreateComponent),
+    },
   {
     path: 'students/new',
     loadComponent: () =>

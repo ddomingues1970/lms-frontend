@@ -1,0 +1,37 @@
+.form-container {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.form-container h2 {
+  text-align: center;
+}
+
+.form-container div {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+}
+
+.error {
+  margin-top: 10px;
+  color: red;
+}

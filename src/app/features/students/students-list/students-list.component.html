@@ -1,1 +1,33 @@
-<p>students-list works!</p>
+<div style="padding: 1rem">
+  <h2>Estudantes</h2>
+
+  <button (click)="goToCreate()">+ Novo Estudante</button>
+
+  <div *ngIf="loading">Carregando...</div>
+  <div *ngIf="error" style="color:red">{{ error }}</div>
+
+  <table *ngIf="!loading && students.length > 0" border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Data Nasc.</th>
+        <th>E-mail</th>
+        <th>Telefone</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of students">
+        <td>{{ s.id }}</td>
+        <td>{{ s.firstName }} {{ s.lastName }}</td>
+        <td>{{ s.birthDate }}</td>
+        <td>{{ s.email }}</td>
+        <td>{{ s.phone }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && students.length === 0">
+    Nenhum estudante encontrado.
+  </div>
+</div>

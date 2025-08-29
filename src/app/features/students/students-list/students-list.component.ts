@@ -1,40 +1,45 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { StudentsService } from '../../../core/services/students.service';
 import { Student } from '../../../core/models/student.model';
 
 @Component({
-  standalone: true,
   selector: 'app-students-list',
+  standalone: true,
   imports: [CommonModule],
-  template: `
-    <section style="padding:16px">
-      <h2>Students</h2>
-
-      <div *ngIf="loading">Loading...</div>
-      <div *ngIf="error" style="color:#c00">Erro: {{ error }}</div>
-
-      <ul *ngIf="!loading && !error">
-        <li *ngFor="let s of students">
-          <strong>{{ s.firstName }} {{ s.lastName }}</strong>
-          &nbsp;•&nbsp; {{ s.email }} &nbsp;•&nbsp; {{ s.phone }}
-        </li>
-      </ul>
-    </section>
-  `
+  templateUrl: './students-list.component.html',
+  styleUrls: ['./students-list.component.css']
 })
 export class StudentsListComponent implements OnInit {
   students: Student[] = [];
   loading = false;
   error: string | null = null;
 
-  constructor(private studentsService: StudentsService) {}
+  constructor(private studentsService: StudentsService, private router: Router) {}
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
     this.loading = true;
+    this.error = null;
+
     this.studentsService.list().subscribe({
-      next: data => { this.students = data; this.loading = false; },
-      error: err => { this.error = err?.message ?? 'Erro desconhecido'; this.loading = false; }
+      next: (data: Student[]) => {
+        this.students = data;
+        this.loading = false;
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.error = 'Erro ao carregar estudantes.';
+        this.loading = false;
+      }
     });
+  }
+
+  goToCreate(): void {
+    this.router.navigate(['/students/register']);
   }
 }
