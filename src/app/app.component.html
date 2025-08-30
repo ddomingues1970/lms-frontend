@@ -3,13 +3,20 @@
     <a routerLink="/students" style="margin-left:12px">Students</a>
     <a routerLink="/courses" style="margin-left:12px">Courses</a>
     <a routerLink="/enrollments" style="margin-left:12px">Matrículas</a>
+
+    <!-- Link de Logs só aparece se o usuário tiver role STUDENT -->
+    <a *ngIf="isStudent()" routerLink="/tasklogs-list" style="margin-left:12px">Logs</a>
   </div>
 
   <!-- Lado direito: status de autenticação -->
   <div *ngIf="isLoggedIn(); else loggedOut" style="display:flex; align-items:center; gap:12px">
-    <span>Logado como <strong>{{ username }}</strong></span>
+    <span>
+      Logado como 
+      <strong>{{ username || role || 'usuário' }}</strong>
+    </span>
     <button (click)="logout()">Sair</button>
   </div>
+
   <ng-template #loggedOut>
     <a routerLink="/login">Entrar</a>
   </ng-template>

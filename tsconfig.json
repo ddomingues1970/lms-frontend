@@ -3,6 +3,10 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./src",  // Defina a base do projeto para o diretório src
+    "paths": {
+      "src/environments/*": ["environments/*"]  // Mapeia o diretório environments
+    },
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,

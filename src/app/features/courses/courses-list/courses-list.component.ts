@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { CoursesService } from '../../../core/services/courses.service';
@@ -11,59 +11,10 @@ import { Course } from '../../../core/models/course.model';
   standalone: true,
   selector: 'app-courses-list',
   imports: [CommonModule, RouterLink, FormsModule],
-  template: `
-    <section style="padding:16px">
-      <h2>Cursos</h2>
-
-      <div style="margin-bottom:12px; display:flex; gap:12px; align-items:center;">
-        <a routerLink="/courses/new">+ Novo curso</a>
-
-        <div style="margin-left:auto">
-          <label>
-            <strong>Student ID:</strong>
-            <input type="number" [(ngModel)]="studentId" min="1" style="width:120px; margin-left:8px;" />
-          </label>
-          <small *ngIf="!studentId" style="margin-left:8px; color:#666">Informe o ID do estudante para matricular.</small>
-        </div>
-      </div>
-
-      <div *ngIf="loading">Carregando...</div>
-      <div *ngIf="error" style="color:#c00">Erro: {{ error }}</div>
-
-      <table *ngIf="!loading && !error" border="1" cellpadding="8" cellspacing="0" style="min-width:800px">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Descrição</th>
-            <th>Início</th>
-            <th>Fim</th>
-            <th style="width:240px">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let c of courses">
-            <td>{{ c.name }}</td>
-            <td>{{ c.description }}</td>
-            <td>{{ c.startDate }}</td>
-            <td>{{ c.endDate }}</td>
-            <td>
-              <a [routerLink]="['/courses', c.id, 'edit']">Editar</a>
-              <button (click)="remove(c)" style="margin-left:6px">Excluir</button>
-              <button
-                (click)="enroll(c)"
-                [disabled]="!studentId || enrolling[c.id]"
-                style="margin-left:6px"
-                title="Matricular estudante no curso"
-              >
-                {{ enrolling[c.id] ? 'Matriculando...' : 'Matricular' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  `
+  templateUrl: './courses-list.component.html',
+  styleUrls: ['./courses-list.component.scss']
 })
+
 export class CoursesListComponent implements OnInit {
   courses: Course[] = [];
   loading = false;
@@ -77,7 +28,8 @@ export class CoursesListComponent implements OnInit {
 
   constructor(
     private coursesService: CoursesService,
-    private enrollmentsService: EnrollmentsService
+    private enrollmentsService: EnrollmentsService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -94,7 +46,7 @@ export class CoursesListComponent implements OnInit {
 
   remove(c: Course): void {
     if (!confirm(`Excluir o curso "${c.name}"?`)) return;
-    this.coursesService.remove(c.id).subscribe({
+    this.coursesService.remove(c.id!).subscribe({
       next: () => this.fetch(),
       error: (err) => alert(err?.error?.message ?? 'Falha ao excluir.')
     });
@@ -102,6 +54,8 @@ export class CoursesListComponent implements OnInit {
 
   enroll(c: Course): void {
     if (!this.studentId) { alert('Informe o Student ID.'); return; }
+    if (c.id == null) { alert('Curso inválido.'); return; }
+
     this.enrolling[c.id] = true;
 
     this.enrollmentsService.enroll(this.studentId, c.id).subscribe({
@@ -123,5 +77,16 @@ export class CoursesListComponent implements OnInit {
         }
       }
     });
+  }
+
+  // ---- NOVO: lógica para exibir Logs e navegar ----
+  isStudent(): boolean {
+    return (localStorage.getItem('role') ?? '').toUpperCase() === 'STUDENT';
+  }
+
+  goToLogs(): void {
+    // A lista de logs busca o studentId da rota ou do localStorage.
+    // Como estamos usando só o role, navegamos sem id explícito.
+    this.router.navigate(['/tasklogs-list']);
   }
 }

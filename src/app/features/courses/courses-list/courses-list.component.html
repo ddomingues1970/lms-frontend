@@ -1,1 +1,62 @@
-<p>courses-list works!</p>
+<section style="padding:16px">
+  <h2>Cursos</h2>
+
+  <div style="margin-bottom:12px; display:flex; gap:12px; align-items:center;">
+    <a routerLink="/courses/new">+ Novo curso</a>
+
+    <div style="margin-left:auto">
+      <label>
+        <strong>Student ID:</strong>
+        <input type="number" [(ngModel)]="studentId" min="1" style="width:120px; margin-left:8px;" />
+      </label>
+      <small *ngIf="!studentId" style="margin-left:8px; color:#666">
+        Informe o ID do estudante para matricular.
+      </small>
+    </div>
+  </div>
+
+  <div *ngIf="loading">Carregando...</div>
+  <div *ngIf="error" style="color:#c00">Erro: {{ error }}</div>
+
+  <table *ngIf="!loading && !error" border="1" cellpadding="8" cellspacing="0" style="min-width:800px">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Início</th>
+        <th>Fim</th>
+        <th style="width:320px">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of courses">
+        <td>{{ c.name }}</td>
+        <td>{{ c.description }}</td>
+        <td>{{ c.startDate }}</td>
+        <td>{{ c.endDate }}</td>
+        <td>
+          <!-- editar via routerLink (sem método TS) -->
+          <a [routerLink]="['/courses', c.id, 'edit']">Editar</a>
+
+          <!-- excluir usa seu método existente remove(c: Course) -->
+          <button (click)="remove(c)" style="margin-left:6px">Excluir</button>
+
+          <!-- matricular usa seu método existente enroll(c: Course) -->
+          <button
+            (click)="enroll(c)"
+            [disabled]="!studentId || enrolling[c.id!]"
+            style="margin-left:6px"
+            title="Matricular estudante no curso"
+          >
+            {{ enrolling[c.id!] ? 'Matriculando...' : 'Matricular' }}
+          </button>
+
+          <!-- NOVO: acesso aos Logs (sem depender de método TS) -->
+          <a [routerLink]="['/tasklogs-list']" style="margin-left:6px" title="Ver/registrar logs">
+            Logs
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
