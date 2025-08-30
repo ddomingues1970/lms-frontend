@@ -1,8 +1,18 @@
-<nav style="padding:8px 16px; border-bottom:1px solid #ddd">
-  <a routerLink="/">Home</a>
-  <a routerLink="/students" style="margin-left:12px">Students</a>
-  <a routerLink="/courses" style="margin-left:12px">Courses</a>
-  <a routerLink="/enrollments" style="margin-left:12px">Matrículas</a>
+<nav style="padding:8px 16px; border-bottom:1px solid #ddd; display:flex; align-items:center; gap:12px">
+  <div style="flex:1">    
+    <a routerLink="/students" style="margin-left:12px">Students</a>
+    <a routerLink="/courses" style="margin-left:12px">Courses</a>
+    <a routerLink="/enrollments" style="margin-left:12px">Matrículas</a>
+  </div>
+
+  <!-- Lado direito: status de autenticação -->
+  <div *ngIf="isLoggedIn(); else loggedOut" style="display:flex; align-items:center; gap:12px">
+    <span>Logado como <strong>{{ username }}</strong></span>
+    <button (click)="logout()">Sair</button>
+  </div>
+  <ng-template #loggedOut>
+    <a routerLink="/login">Entrar</a>
+  </ng-template>
 </nav>
 
 <router-outlet></router-outlet>

@@ -1,59 +1,193 @@
-# LmsFrontend
+# LMS Frontend (Angular 19)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+Frontend do **Learning Management System**.
 
-## Development server
+- **Stack:** Angular 19, TypeScript
+- **Auth:** Basic Auth (via Interceptor)
+- **Backend alvo:** Java 21 / Spring Boot 3.4 – padrão em `http://localhost:8080`
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## 1) Pré-requisitos
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Node.js **20+**
+- Angular CLI **19**  
+  ```bash
+  npm i -g @angular/cli
+2) Configuração de ambiente
+Edite src/environments/environment.ts (dev):
 
-## Code scaffolding
+ts
+Copy code
+export const environment = {
+  production: false,
+  apiBaseUrl: 'http://localhost:8080' // NÃO inclua /api aqui
+};
+Os services já montam as rotas como ${API_BASE}/api/..., evitando //.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+3) Instalação
+bash
+Copy code
+npm ci
+# ou: npm install
+4) Executar em desenvolvimento
+bash
+Copy code
+npm start
+# equivalente a "ng serve -o"
+# abre em http://localhost:4200
+Dica: se trocar URLs no environment.ts, pare o servidor (Ctrl+C) e rode de novo.
 
-```bash
-ng generate component component-name
-```
+5) Autenticação e usuários de teste
+O frontend usa HTTP Basic armazenado em sessionStorage:
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+sessionStorage['authHeader'] = "Basic <base64(user:pass)>"
 
-```bash
-ng generate --help
-```
+sessionStorage['username'] = "<user>"
 
-## Building
+Usuários de teste (backend padrão):
 
-To build the project run:
+admin / admin123 (ROLE_ADMIN)
 
-```bash
-ng build
-```
+student / student123 (ROLE_STUDENT)
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Como logar
+Acesse http://localhost:4200/login
 
-## Running unit tests
+Informe usuário e senha
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Após login, a navbar mostra: “Logado como {username}” e o botão Sair
 
-```bash
-ng test
-```
+Verificação rápida (DevTools → Console)
+js
+Copy code
+sessionStorage.getItem('authHeader'); // "Basic ABC..."
+sessionStorage.getItem('username');   // "admin" ou "student"
+Problemas comuns
+401/403 em /students:
 
-## Running end-to-end tests
+Verifique se fez login (vá em /login).
 
-For end-to-end (e2e) testing, run:
+Em DevTools → Network, confira o header Authorization nas chamadas:
 
-```bash
-ng e2e
-```
+Deve aparecer: Authorization: Basic <token>
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Algumas rotas podem exigir ROLE_ADMIN no backend (tente logar como admin/admin123).
 
-## Additional Resources
+6) Rotas principais
+/login – tela de login
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+/students – lista de estudantes (com botão “+ Novo Estudante”)
+
+/students/register – cadastro de estudante (validações no front)
+
+Outras rotas (/courses, /enrollments) já existem e podem ser evoluídas.
+
+7) Funcionalidades implementadas
+Estudantes
+Listagem: carrega do backend, mostra loading/erro/empty.
+
+Cadastro:
+
+Campos obrigatórios: Primeiro/Último nome, Data de nascimento (≥ 16), E-mail (único), Telefone.
+
+Trata conflito de e-mail duplicado (HTTP 409).
+
+Autenticação:
+
+Login e Logout (limpa sessão e redireciona para /login).
+
+Exibe usuário logado na navbar.
+
+8) Build de produção
+bash
+Copy code
+npm run build
+# artefatos em ./dist/lms-frontend/
+Servir o build (exemplos)
+8.1) Com o próprio Angular (serve estático simples)
+Use um servidor estático qualquer (ex.: npx http-server):
+
+bash
+Copy code
+npx http-server ./dist/lms-frontend -p 4200 -a 0.0.0.0
+# abre em http://localhost:4200
+8.2) Nginx (produção)
+Copie o conteúdo de ./dist/lms-frontend para /usr/share/nginx/html/
+
+Certifique-se de ter um try_files para SPA no location /:
+
+nginx
+Copy code
+location / {
+  try_files $uri $uri/ /index.html;
+}
+Importante: O backend deve estar acessível pelo navegador (CORS liberado, se necessário).
+
+9) Testes úteis
+Ver se o backend responde (exemplos)
+bash
+Copy code
+# listar estudantes (autenticação básica)
+curl -i -u admin:admin123 http://localhost:8080/api/students
+
+# cadastrar estudante
+curl -i -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{
+        "firstName":"Ana",
+        "lastName":"Silva",
+        "birthDate":"2000-01-01",
+        "email":"ana@example.com",
+        "phone":"+55 47 99999-0000"
+      }'
+10) Estrutura (resumo)
+bash
+Copy code
+src/
+  app/
+    app.component.(ts|html|scss)
+    app-routing.module.ts
+    core/
+      interceptors/auth.interceptor.ts
+      services/
+        auth.service.ts
+        students.service.ts
+      models/
+        student.model.ts
+        ... (course/enrollment/tasklog, se aplicável)
+    features/
+      auth/
+        login/
+          login.component.(ts|html|css)
+      students/
+        students-list/
+          students-list.component.(ts|html|css)
+        students-create/
+          students-create.component.(ts|html|css)
+      # courses/, enrollments/ já existem para evolução
+11) Roadmap / Trabalhos futuros
+Cursos (ADMIN): CRUD completo, nome único, e regra “concluir ≤ 6 meses”.
+
+Matrículas (STUDENT): limitar a 3 cursos ativos por estudante.
+
+Task Logs (STUDENT):
+
+Campos: data, categoria (PESQUISA, PRATICA, ASSISTIR_VIDEOAULA), descrição,
+
+Tempo em incrementos de 30 min,
+
+Editar / remover logs.
+
+Guards de rota:
+
+authGuard (rota exige login),
+
+adminGuard (rota exige ROLE_ADMIN).
+
+Tratamento de erros mais rico (toasts, i18n, etc).
+
+Testes unitários em services/validators.
+
+12) Licença
+MIT (ou a de sua preferência)
