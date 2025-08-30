@@ -27,4 +27,9 @@ export class AuthService {
   getUsername(): string | null {
     return sessionStorage.getItem(this.USER_KEY);
   }
+
+  getRole(): string | null {
+  return localStorage.getItem('role'); // ou de onde você estiver guardando
+}
+
 }

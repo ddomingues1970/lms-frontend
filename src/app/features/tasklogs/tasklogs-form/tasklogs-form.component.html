@@ -1,0 +1,55 @@
+<div class="tasklog-form">
+  <h2>{{ taskLogId ? 'Editar' : 'Criar' }} Log de Tarefa</h2>
+
+  <form [formGroup]="taskLogForm" (ngSubmit)="submit()">
+    <div class="form-group">
+      <label for="categoryId">Categoria</label>
+      <select formControlName="categoryId" id="categoryId" class="form-control" required>
+        <option value="">Selecione a categoria</option>
+        <option value="1">PESQUISA</option>
+        <option value="2">PRÁTICA</option>
+        <option value="3">ASSISTIR_VIDEOAULA</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="timestamp">Data e Hora</label>
+      <input
+        type="datetime-local"
+        formControlName="timestamp"
+        id="timestamp"
+        class="form-control"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Descrição</label>
+      <input
+        type="text"
+        formControlName="description"
+        id="description"
+        class="form-control"
+        placeholder="Descrição da tarefa"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="minutesSpent">Tempo Gasto (minutos)</label>
+      <input
+        type="number"
+        formControlName="minutesSpent"
+        id="minutesSpent"
+        class="form-control"
+        placeholder="Tempo em minutos"
+        min="30"
+        required
+      />
+    </div>
+
+    <button type="submit" [disabled]="taskLogForm.invalid" class="btn btn-primary">
+      {{ taskLogId ? 'Atualizar' : 'Criar' }} Log de Tarefa
+    </button>
+  </form>
+</div>

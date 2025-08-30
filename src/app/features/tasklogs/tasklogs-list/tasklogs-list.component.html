@@ -1,1 +1,38 @@
-<p>tasklogs-list works!</p>
+<div class="tasklogs-list">
+  <h2>Logs de Tarefas</h2>
+
+  <button (click)="newLog()">+ Novo Log</button>
+
+  <div *ngIf="loading">Carregando...</div>
+
+  <table *ngIf="!loading && taskLogs.length > 0" border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Categoria</th>
+        <th>Data/Hora</th>
+        <th>Descrição</th>
+        <th>Tempo (min)</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let log of taskLogs">
+        <td>{{ log.id ?? '—' }}</td>
+        <td>{{ log.categoryId }}</td>
+        <td>{{ log.timestamp | date:'short' }}</td>
+        <td>{{ log.description }}</td>
+        <td>{{ log.minutesSpent }}</td>
+        <td>
+          <!-- non-null assertion para satisfazer o template checker -->
+          <button (click)="editLog(log.id!)" [disabled]="!log.id">Editar</button>
+          <button (click)="deleteLog(log.id!)" [disabled]="!log.id">Excluir</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && taskLogs.length === 0">
+    Nenhum log encontrado.
+  </div>
+</div>
