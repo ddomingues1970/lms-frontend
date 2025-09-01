@@ -1,3 +1,5 @@
 import { environment } from '../../../environments/environment';
 
-export const API_BASE = environment.apiBaseUrl; // <- usar apiBaseUrl
+// Remove barras finais e evita duplicar /api
+const base = environment.apiBaseUrl.replace(/\/+$/, '');
+export const API_BASE = base.endsWith('/api') ? base : `${base}/api`;
