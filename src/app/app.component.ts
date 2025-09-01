@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule], // ✅ habilita *ngIf / pipes e <router-outlet>/<a routerLink>
+  imports: [CommonModule, RouterModule], // habilita *ngIf / pipes e <router-outlet>/<a routerLink>
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -15,7 +16,8 @@ export class AppComponent implements OnInit, OnDestroy {
   username: string | null = null;
   role: string | null = null;
 
-  private onStorage = () => this.refreshAuthInfo();
+  private storageHandler = () => this.refreshAuthInfo();
+  private routerSub?: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -24,21 +26,30 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.refreshAuthInfo();
-    window.addEventListener('storage', this.onStorage);
+
+    // 1) se outro tab alterar o localStorage
+    window.addEventListener('storage', this.storageHandler);
+
+    // 2) após navegações (ex.: login -> redireciona), atualiza o header
+    this.routerSub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => this.refreshAuthInfo());
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('storage', this.onStorage);
+    window.removeEventListener('storage', this.storageHandler);
+    this.routerSub?.unsubscribe();
   }
 
   private refreshAuthInfo(): void {
+    // tenta pelo serviço; se não existir, cai no localStorage
     this.username =
-      this.authService.getUsername?.() ??
+      (this.authService.getUsername?.() ?? null) ??
       localStorage.getItem('username') ??
       null;
 
     this.role =
-      this.authService.getRole?.() ??
+      (this.authService.getRole?.() ?? null) ??
       localStorage.getItem('role') ??
       null;
   }
@@ -47,7 +58,8 @@ export class AppComponent implements OnInit, OnDestroy {
     if (typeof this.authService.isLoggedIn === 'function') {
       return this.authService.isLoggedIn();
     }
-    return !!localStorage.getItem('token') || !!localStorage.getItem('role');
+    // fallback defensivo
+    return !!localStorage.getItem('authHeader') || !!localStorage.getItem('role');
   }
 
   isStudent(): boolean {
@@ -58,6 +70,8 @@ export class AppComponent implements OnInit, OnDestroy {
     try {
       this.authService.logout?.();
     } finally {
+      // limpeza defensiva para qualquer implementação anterior
+      localStorage.removeItem('authHeader');
       localStorage.removeItem('token');
       localStorage.removeItem('username');
       localStorage.removeItem('role');
